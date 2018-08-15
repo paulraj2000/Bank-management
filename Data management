@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import Logistic Regression
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
@@ -15,30 +16,25 @@ from sklearn import metrics as m
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import ShuffleSplit
 from sklearn.metrics import roc_auc_score
-
 data = pd.read_csv('../input/bank.csv',sep=',',header='infer')
 data = data.drop(['day','poutcome'],axis=1)
-
+data.head()
 def binaryType_(data):
-    
     data.deposit.replace(('yes', 'no'), (1, 0), inplace=True)
     data.default.replace(('yes','no'),(1,0),inplace=True)
     data.housing.replace(('yes','no'),(1,0),inplace=True)
     data.loan.replace(('yes','no'),(1,0),inplace=True)
+    data.options.mode.chained_assignment= None;
     #data.marital.replace(('married','single','divorced'),(1,2,3),inplace=True)
     data.contact.replace(('telephone','cellular','unknown'),(1,2,3),inplace=True)
     data.month.replace(('jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'),(1,2,3,4,5,6,7,8,9,10,11,12),inplace=True)
-    #data.education.replace(('primary','secondary','tertiary','unknown'),(1,2,3,4),inplace=True)
+    data.head()
+  #data.education.replace(('primary','secondary','tertiary','unknown'),(1,2,3,4),inplace=True)
     
     return data
 
 data = binaryType_(data)
-
-# for i in range(len(data.marital.unique())):
-#     data["marital_"+str(data.marital.unique()[i])] = (data.marital == data.marital.unique()[i]).astype(int)
-
-# for j in range(len(data.job.unique())):
-#     data["job_"+str(data.job.unique()[j])] = (data.job == data.job.unique()[j]).astype(int)
+print(data);
 
 # for k in range(len(data.contact.unique())):
 #     data["contact_"+str(data.contact.unique()[k])] = (data.contact == data.contact.unique()[k]).astype(int)
@@ -60,11 +56,13 @@ plt.hist(data.age,bins=10)
 plt.show()
 plt.hist(data.balance,bins=1000)
 plt.show()
+plt.head()
 fig = plt.figure(1, figsize=(9, 6))
 ax1 = fig.add_subplot(211)
 bp1 = ax1.boxplot(data.balance,0,'')
 ax2 = fig.add_subplot(212)
 bp2 = ax2.boxplot(data.balance,0,'gD')
+bp2.head()
 plt.show()
 fig = plt.figure(1, figsize=(6, 6))
 ax = fig.add_subplot(211)
@@ -105,8 +103,8 @@ def campaign_(data):
     
     data.loc[data['campaign'] == 1,'campaign'] = 1
     data.loc[(data['campaign'] >= 2) & (data['campaign'] <= 3),'campaign'] = 2
-    data.loc[data['campaign'] >= 4,'campaign'] = 3
-    
+    data.loc[data['campaign'] >= 2,'campaign'] = 1
+    data.head()
     return data
 
 def duration_(data):
@@ -126,7 +124,7 @@ def pdays_(data):
     data.loc[data['pdays'] == -1 ,'pdays_not_contacted'] = 1
     data['months_passed'] = data['pdays']/30
     data.loc[(data['months_passed'] >= 0) & (data['months_passed'] <=2) ,'months_passed'] = 1
-    data.loc[(data['months_passed'] > 2) & (data['months_passed'] <=6),'months_passed'] = 2
+    data.loc[(data['months_passed'] > 1) & (data['months_passed'] <=6),'months_passed'] = 4
     data.loc[data['months_passed'] > 6 ,'months_passed'] = 3
     
     return data
@@ -134,6 +132,7 @@ def pdays_(data):
 def previous_(data):
     
     data['Not_Contacted'] = 0
+    data.options.mode.chained_assignment= None;
     data['Contacted'] = 0
     data.loc[data['previous'] == 0 ,'Not_Contacted'] = 1
     data.loc[(data['previous'] >= 1) & (data['pdays'] <=99) ,'Contacted'] = 1
@@ -173,7 +172,7 @@ plt.show()
     data.loc[data['job'] == "student",'job'] = 10
     data.loc[data['job'] == "housemaid",'job'] = 11
     data.loc[data['job'] == "unknown",'job'] = 12
-    
+    data.options.mode.chained_assignment= None;
     return data
 
 def marital_(data):
@@ -193,6 +192,7 @@ def education_(data):
     data['secondary'] = 0
     data['tertiary'] = 0
     data['unknown'] = 0
+    data.head()
     data.loc[data['education'] == 'primary','primary'] = 1
     data.loc[data['education'] == 'secondary','secondary'] = 1
     data.loc[data['education'] == 'tertiary','tertiary'] = 1
@@ -299,6 +299,7 @@ for Name,classify in classifiers.items():
 print(log)
 plt.xlabel('Accuracy')
 plt.title('Classifier Accuracy')
+plt.head()
 sns.set_color_codes("muted")
 sns.barplot(x='Accuracy', y='Classifier', data=log, color="g")  
 plt.show()
@@ -311,10 +312,10 @@ plt.xlim([0.0, 1.0])
 plt.title('Precision-Recall')
 plt.legend(loc="lower left")
 plt.show()
-import warnings
 warnings.filterwarnings('ignore')
 rs = ShuffleSplit(n_splits=1, test_size=0.2,random_state=0)
 rs.get_n_splits(data_X,data_y)
+rs.head()
 for Name,classify in classifiers.items():
     for train_index, test_index in rs.split(data_X,data_y):
         #print("TRAIN:", train_index, "TEST:", test_index)
@@ -324,18 +325,21 @@ for Name,classify in classifiers.items():
         cls =cls.fit(X,y)
         y_out = cls.predict(X_test)
         accuracy = accuracy_score(y_test,y_out)
+        accuracy.options.mode.chained_assignment= None;
         precision = m.precision_score(y_test,y_out,average='macro')
+        precision.head()
         recall = m.recall_score(y_test,y_out,average='macro')
         f1_score = m.f1_score(y_test,y_out,average='macro')
         roc_auc = roc_auc_score(y_out,y_test)
         log_entry = pd.DataFrame([[Name,accuracy,precision,recall,f1_score,roc_auc]], columns=log_cols)
         #metric_entry = pd.DataFrame([[precision,recall,f1_score,roc_auc]], columns=metrics_cols)
         log = log.append(log_entry)
+        print(log)
         #metric = metric.append(metric_entry)
     
-print(log)
+
 plt.xlabel('Accuracy')
 plt.title('Classifier Accuracy')
 sns.set_color_codes("muted")
-sns.barplot(x='Accuracy', y='Classifier', data=log, color="g")  
+sns.barplot(x='Accuracy', y='Classifier', data=log, color="g") 
 plt.show()
